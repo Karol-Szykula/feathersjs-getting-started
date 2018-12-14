@@ -64,3 +64,25 @@ const app = feathers();
 // Initialize the messages service by creating
 // a new instance of our class
 app.use('messages', new Messages());
+
+async function processMessages() {
+    await app.service('messages').create({
+        text: 'First message'
+    });
+
+    let messageList = await app.service('messages').find();
+
+    console.log('Available messages', messageList);
+
+    await app.service('messages').create({
+        text: 'Second message'
+    });
+
+    messageList = await app.service('messages').find();
+
+    console.log('Available messages', messageList);
+    console.log(typeof(messageList));
+
+}
+
+processMessages();
