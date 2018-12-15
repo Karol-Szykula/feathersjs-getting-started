@@ -1,6 +1,7 @@
 const feathers = require('@feathersjs/feathers');
 const express = require('@feathersjs/express');
 const memory = require('feathers-memory');
+const socketio = require('@feathersjs/socketio');
 
 class Messages {
     constructor() {
@@ -63,6 +64,15 @@ class Messages {
 
 const app = express(feathers());
 
+// Configure the Socket.io transport
+app.configure(socketio());
+
+// On any real-time connection, add it to the `everybody` channel
+app.on('connection', connection => app.channel('everybody').join(connection));
+
+// Publish all events to the `everybody` channel
+app.publish(() => app.channel('everybody'));
+
 // Turn on JSON body parsing for REST services
 app.use(express.json())
 // Turn on URL-encoded body parsing for REST services
@@ -92,7 +102,6 @@ app.service('messages').create({
     text: 'Hello from the server'
 });
 
-server.on('listening', () => console.log('Feathers REST API started at http://localhost:3030'));
 
 async function createAndFind() {
     // Stores a reference to the messages service so we don't have to call it all the time
@@ -139,3 +148,5 @@ async function createAndFind() {
 }
 
 createAndFind();
+
+server.on('listening', () => console.log('Feathers REST API started at http://localhost:3030'));
